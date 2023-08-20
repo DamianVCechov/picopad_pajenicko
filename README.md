@@ -2,7 +2,9 @@ Fork from the Picopad GAMES: [https://github.com/tvecera/picopad-playground/tree
 
 Inspired by the Snake game from [Parth Sarthi Sharma](https://parthssharma.github.io).
 
-:black_cat: NOTICE: The game is still in development.
+**:black_cat: NOTICE :black_cat:**
+
+The game is still in development.
 
 ---
 
