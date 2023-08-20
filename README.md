@@ -1,3 +1,5 @@
+Snake game is for custom bootloader from [Tomáš Večeřa](https://github.com/tvecera/picopad-playground).
+
 Fork from the Picopad GAMES: [https://github.com/tvecera/picopad-playground/tree/main/picopad-sdk/games](https://github.com/tvecera/picopad-playground/tree/main/picopad-sdk/games).
 
 Inspired by the Snake game from [Parth Sarthi Sharma](https://parthssharma.github.io).
