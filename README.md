@@ -2,6 +2,8 @@ Fork from the Picopad GAMES: [https://github.com/tvecera/picopad-playground/tree
 
 Inspired by the Snake game from [Parth Sarthi Sharma](https://parthssharma.github.io).
 
+:black_cat: NOTICE: The game is still in development.
+
 ---
 
 **⚠️ WARNING ⚠️**
@@ -12,6 +14,3 @@ contents of the /build directory to an SD card.
 
 Please note, the build does NOT include a BOOT2 section. Directly uploading the build to the Picopad / Pico will
 brick your Pico / Picopad.
-
-This is an ALPHA VERSION and it's still in the testing phase. Therefore, all operations should be performed at your own
-risk. 
