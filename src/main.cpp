@@ -1,10 +1,8 @@
-/*
- * Parth Sarthi Sharma (pss242@cornell.edu)
- * Code based on examples from Raspberry Pi Foundation.
- * This code is an implementation of the famous snake game.
- * It uses 4 GPIO pins to control the snake which has to eat the food
- * in order to grow in length.
- */
+// ****************************************************************************
+//
+//                                 Main code
+//
+// ****************************************************************************
 
 //Include necessary libraries
 #include "pico/stdlib.h"
@@ -22,29 +20,34 @@
 #include "lib_drawtft.h"
 #include "st7789.h"
 
+//Definition of snake
 #define WIDTH_SNAKE 80
 #define HEIGHT_SNAKE 60
 #define SNAKE_SIZE 4
 
-//Structure to hold the node (each point) of the snake.
-//The snake is constructed using a linked list type data structure.
-typedef struct Node{ //Node structure
-short x; //The x coordinate and the y coordinate of the node
+//Structure to hold the node (each point) of the snake
+typedef struct Node{
+short x;
 short y;
-struct Node *next; //The next node of the snake
-}Node;
+struct Node *next;
+}
+Node;
 
-Node *head = NULL; //The head of the snake
+//The head of the snake
+Node *head = NULL;
 
-short food[2]; //The array to hold x-coordinate and the y-coordinate of the food
-static char direction = KEY_RIGHT; //The current direction of the snake
-char alive = 1; //The flag that determines if the snake is alive
-volatile char reset = 1; //The reset flag
+//The arry to hold x/y-coordinates of the food
+short food[2];
+static char direction = KEY_RIGHT;
+char alive = 1;
+volatile char reset = 1;
 
-inline int randomRange(int min, int max){ //Function to generate a random number between min and max
+//Function to generate a random number between min and max
+inline int randomRange(int min, int max){
     return (rand() % (max - min)) + min;
 }
 
+// Draw a rectangle for food
 void drawRect(short x, short y, short width, short height, uint16_t color) {
     for (short i = y; i < y + height; i++) {
         for (short j = x; j < x + width; j++) {
@@ -53,7 +56,8 @@ void drawRect(short x, short y, short width, short height, uint16_t color) {
     }
 }
 
-void swap(short *x, short *y){ //Function to swap two shorts
+//Function to swap two shorts
+void swap(short *x, short *y){
     if(*x != *y){
         *x = *x ^ *y;
         *y = *x ^ *y;
@@ -61,187 +65,200 @@ void swap(short *x, short *y){ //Function to swap two shorts
     }
 }
 
-void genFood(){ //The function to generate the food
+ //The function to generate the food
+void genFood(){
 genAgain:
-    food[0] = randomRange(0, HEIGHT_SNAKE); //Get a random x coordinate
-    food[1] = randomRange(0, HEIGHT_SNAKE); //Get a random y coordinate
-    Node *current = head; //Create a new current node
-    current = current->next; //Make the current node point to the next node
-    while(current != NULL){ //Iterate to the end of the list
-        if(food[0] == current->x && food[1] == current->y){ //If at any point the food lies on the body of the snake
-            goto genAgain; //Generate new coordinates for the food
+    food[0] = randomRange(0, HEIGHT_SNAKE);
+    food[1] = randomRange(0, HEIGHT_SNAKE);
+    Node *current = head;
+    current = current->next;
+    while(current != NULL){ 
+        if(food[0] == current->x && food[1] == current->y){
+            goto genAgain;
         }
-        current = current->next; //Else point to the next node
+        current = current->next;
     }
-    drawRect(food[0] << 2, food[1] << 2, SNAKE_SIZE, SNAKE_SIZE, COL_YELLOW); //Draw a yellow rectangle for food
+    //Draw a yellow rectangle for food
+    drawRect(food[0] << 2, food[1] << 2, SNAKE_SIZE, SNAKE_SIZE, COL_YELLOW);
 }
 
-void addNode(short x, short y){ //Function to add a new node for the snake
-    if(head == NULL){ //If the linked list is empty
-        head = (Node *)malloc(sizeof(Node)); //Allocate memory for the head
-        head->x = x; //Set x-coordinate for the head
-        head->y = y; //Set y-coordinate for the head
-        head->next = NULL; //Make the next of head as NULL
-        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED); //Draw a red rectangle for head
+//Function to add a new node for the snake
+void addNode(short x, short y){
+    if(head == NULL){
+        head = (Node *)malloc(sizeof(Node));
+        head->x = x;
+        head->y = y;
+        head->next = NULL;
+        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
     }
-    else{ //Else
-        Node *current = head; //Create a new pointer pointing to the head
-        while(current->next != NULL){ //Iterate to the last element of the list
+    else{
+        Node *current = head;
+        while(current->next != NULL){
             current = current->next;
         }
-        current->next = (Node *)malloc(sizeof(Node)); //Allocate new memory for the next node
-        current->next->x = x; //Set x-coordinate for the new node
-        current->next->y = y; //Set y-coordinate for the new node
-        current->next->next = NULL; //Set the next node as NULL
-        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN); //Draw a green rectangle for the list
+        current->next = (Node *)malloc(sizeof(Node));
+        current->next->x = x;
+        current->next->y = y;
+        current->next->next = NULL;
+        //Draw a green rectangle for the list
+        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
     }
 }
 
-void move(short x, short y){ //Function to move the snake such that the new coordinates of the head are x, y
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED); //Draw the new head
-    Node *current = head; //Create a new pointer pointing to the head
-    while(current != NULL){ //For all the elements of the snake's body
-        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN); //Draw the new snake body
+//Function to move the snake such that the new coordinates of the head are x, y
+void move(short x, short y){
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
+    Node *current = head;
+    while(current != NULL){
+        //Draw the new snake body
+        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
         //Swap the coordinates and the current node coordinates
         swap(&(current->x), &x);
         swap(&(current->y), &y);
-        current = current->next; //Go over to the next node
-        if(current != NULL){ //If the current node is not null
-            if(current->x == head->x && current->y == head->y){ //If the snake eats itself
-                alive = 0; //Kill it
-                drawRect(head->x << 2, head->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED); //Draw the head one last time
+        current = current->next;
+        if(current != NULL){
+            if(current->x == head->x && current->y == head->y){
+                alive = 0;
+                //Draw the head one last time
+                drawRect(head->x << 2, head->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
                 pDrawFont = FontBoldB8x14;
-                DrawFontHeight = 12; //Set the text size as 4
-                DrawText2("Had je mrtev", 100, 200, COL_WHITE); //Print the message
+                DrawFontHeight = 10;
+                DrawText2("Had je mrtev", 100, 200, COL_WHITE);
                 break;
             }
         }
     }
-
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK); //Clear the oldest element
+    //Clear the oldest element
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
 }
 
-void eatAndMove(short x, short y){ //Function to eat the food and still move by increasing the length of the snake
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED); //Draw the new head
-    Node *current = head; //Create a new pointer pointing to the head
-    while(current->next != NULL){ //For all the elements until the second last element of the snake's body
-        //Store the old values of x and y coordinates in the temporary placeholders
-        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN); //Draw the new snake body
+//Function to eat the food and still move by increasing the length of the snake
+void eatAndMove(short x, short y){
+    //Draw the new head
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
+    Node *current = head;
+    while(current->next != NULL){
+        //Draw the new snake body
+        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
         //Swap the coordinates and the current node coordinates
         swap(&(current->x), &x);
         swap(&(current->y), &y);
-        current = current->next; //Go over to the next node
+        current = current->next;
     }
-
-    current->next = (Node *)malloc(sizeof(Node)); //Allocate new memory for the next node
-    //Update the new coordinates of the body
-    drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN); //Draw the new snake body
+     //Allocate new memory for the next node
+    current->next = (Node *)malloc(sizeof(Node));
+    //Draw the new snake body
+    drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
     //Swap the coordinates and the current node coordinates
     swap(&(current->x), &x);
     swap(&(current->y), &y);
-    current = current->next;  //Go over to the next node
-    //Update the last element of the body
+        current = current->next;
     current->x = x;
     current->y = y;
-    current->next = NULL; //Make the last element point to NULL
+    current->next = NULL;
 }
 
-void moveUp(){ //The function to move UP
-    if(head->x == food[0] && head->y == food[1]){ //If the head is on the food
-        if(head->y == 0){ //If the head is on the top edge of the screen
-            eatAndMove(head->x, HEIGHT_SNAKE - 1); //Eat the food and move to the bottom edge of the screen
+//The function to move UP
+void moveUp(){
+    if(head->x == food[0] && head->y == food[1]){
+        if(head->y == 0){
+            eatAndMove(head->x, HEIGHT_SNAKE - 1);
         }
-        else{ //Else
-            eatAndMove(head->x, head->y - 1); //Eat the food and move UP
+        else{
+            eatAndMove(head->x, head->y - 1);
         }
-        genFood(); //Generate new food
+        genFood();
     }
-    else{ //Else
-        if(head->y == 0){ //If the head is on the top edge of the screen
-            move(head->x, HEIGHT_SNAKE - 1); //Move to the bottom edge of the screen
+    else{
+        if(head->y == 0){
+            move(head->x, HEIGHT_SNAKE - 1);
         }
-        else{ //Else
-            move(head->x, head->y - 1); //Move UP
-        }
-    }
-}
-
-void moveDown(){ //The function to move DOWN
-    if(head->x == food[0] && head->y == food[1]){ //If the head is on the food
-        if(head->y == HEIGHT_SNAKE - 1){ //If the head is on the bottom edge of the screen
-            eatAndMove(head->x, 0); //Eat the food and move to the top edge of the screen
-        }
-        else{ //Else
-            eatAndMove(head->x, head->y + 1); //Eat the food and move DOWN
-        }
-        genFood(); //Generate new food
-    }
-    else{ //Else
-        if(head->y == HEIGHT_SNAKE - 1){ //If the head is on the bottom edge of the screen
-            move(head->x, 0); //Move to the top edge of the screen
-        }
-        else{ //Else
-            move(head->x, head->y + 1); //Move DOWN
+        else{
+            move(head->x, head->y - 1);
         }
     }
 }
 
-void moveLeft(){ //The function to move LEFT
-    if(head->x == food[0] && head->y == food[1]){ //If the head is on the food
-        if(head->x == 0){ //If the head is on the left edge of the screen
-            eatAndMove(WIDTH_SNAKE - 1, head->y); //Eat the food and move to the right edge of the screen
+//The function to move DOWN
+void moveDown(){
+    if(head->x == food[0] && head->y == food[1]){
+        if(head->y == HEIGHT_SNAKE - 1){
+            eatAndMove(head->x, 0);
         }
-        else{ //Else
-            eatAndMove(head->x - 1, head->y); //Eat the food and move LEFT
+        else{
+            eatAndMove(head->x, head->y + 1);
         }
-        genFood(); //Generate new food
+        genFood();
     }
-    else{ //Else
-        if(head->x == 0){ //If the head is on the left edge of the screen
-            move(WIDTH_SNAKE - 1, head->y); //Move to the right edge of the screen
+    else{
+        if(head->y == HEIGHT_SNAKE - 1){
+            move(head->x, 0);
         }
-        else{ //Else
-            move(head->x - 1, head->y); //Move LEFT
-        }
-    }
-}
-
-void moveRight(){ //The function to move RIGHT
-    if(head->x == food[0] && head->y == food[1]){ //If the head is on the food
-        if(head->x == WIDTH_SNAKE - 1){ //If the head is on the right edge of the screen
-            eatAndMove(0, head->y); //Eat the food and move to the left edge of the screen
-        }
-        else{ //Else
-            eatAndMove(head->x + 1, head->y); //Eat the food and move RIGHT
-        }
-        genFood(); //Generate new food
-    }
-    else{ //Else
-        if(head->x == WIDTH_SNAKE - 1){ //If the head is on the right edge of the screen
-            move(0, head->y); //Move to the left edge of the screen
-        }
-        else{ //Else
-            move(head->x + 1, head->y); //Move RIGHT
+        else{
+            move(head->x, head->y + 1);
         }
     }
 }
 
-void changeDir(char key) { //The change direction interrupt handler
-    if(alive){ //If the snake is alive
-        switch(key){ //Switch based on the GPIO
-            case KEY_UP: direction = (direction == KEY_DOWN ? KEY_DOWN : KEY_UP); //If the command is to go UP and the snake isn't going DOWN, go UP
+//The function to move LEFT
+void moveLeft(){
+    if(head->x == food[0] && head->y == food[1]){
+        if(head->x == 0){
+            eatAndMove(WIDTH_SNAKE - 1, head->y);
+        }
+        else{
+            eatAndMove(head->x - 1, head->y);
+        }
+        genFood();
+    }
+    else{
+        if(head->x == 0){
+            move(WIDTH_SNAKE - 1, head->y);
+        }
+        else{
+            move(head->x - 1, head->y);
+        }
+    }
+}
+
+//The function to move RIGHT
+void moveRight(){ 
+    if(head->x == food[0] && head->y == food[1]){
+        if(head->x == WIDTH_SNAKE - 1){
+            eatAndMove(0, head->y);
+        }
+        else{
+            eatAndMove(head->x + 1, head->y);
+        }
+        genFood();
+    }
+    else{
+        if(head->x == WIDTH_SNAKE - 1){
+            move(0, head->y);
+        }
+        else{
+            move(head->x + 1, head->y);
+        }
+    }
+}
+
+//The change direction interrupt handler
+void changeDir(char key) {
+    if(alive){
+        switch(key){
+            case KEY_UP: direction = (direction == KEY_DOWN ? KEY_DOWN : KEY_UP);
                          break;
-            case KEY_DOWN: direction = (direction == KEY_UP ? KEY_UP : KEY_DOWN); //If the command is to go DOWN and the snake isn't going UP, go DOWN
+            case KEY_DOWN: direction = (direction == KEY_UP ? KEY_UP : KEY_DOWN);
                            break;
-            case KEY_LEFT: direction = (direction == KEY_RIGHT ? KEY_RIGHT : KEY_LEFT); //If the command is to go LEFT and the snake isn't going RIGHT, go LEFT
+            case KEY_LEFT: direction = (direction == KEY_RIGHT ? KEY_RIGHT : KEY_LEFT);
                            break;
-            case KEY_RIGHT: direction = (direction == KEY_LEFT ? KEY_LEFT : KEY_RIGHT); //If the command is to go RIGHT and the snake isn't going LEFT, go RIGHT
+            case KEY_RIGHT: direction = (direction == KEY_LEFT ? KEY_LEFT : KEY_RIGHT);
                             break;
             default: break;
         }
     }
-    else{ //If the snake is dead
-        reset = 1; //Set the reset flag
+    else{
+        reset = 1;
     }
 }
 
@@ -250,40 +267,37 @@ int main()
     DeviceInit();
 		char ch = KEY_RIGHT;
 
-    //stdio_init_all();//Initialize all of the present standard stdi
-
-    short i; //An interator
-    srand(1); //Random seed
-
-/*  gpio_set_irq_enabled_with_callback(BTN_UP_PIN, GPIO_IRQ_EDGE_FALL, true, &changeDir); //Attach the callback to the specified GPIO
-    gpio_set_irq_enabled_with_callback(BTN_DOWN_PIN, GPIO_IRQ_EDGE_FALL, true, &changeDir); //Attach the callback to the specified GPIO
-    gpio_set_irq_enabled_with_callback(BTN_LEFT_PIN, GPIO_IRQ_EDGE_FALL, true, &changeDir); //Attach the callback to the specified GPIO
-    gpio_set_irq_enabled_with_callback(BTN_RIGHT_PIN, GPIO_IRQ_EDGE_FALL, true, &changeDir); //Attach the callback to the specified GPIO */
-		SelFont8x8();
-
-
-    while(True){ //While eternity
-        if(reset){ //If the reset flag has been set
-					DrawClear(COL_BLACK);
-            alive = 1; //Resurrect the snake
+    //An interator
+    short i;
+    //Random seed
+    srand(1);
+	SelFont8x8();
+    while(True){
+        if(reset){
+            //Clear the display
+			DrawClear(COL_BLACK);
+            //Resurrect the snake
+            alive = 1;
 
             //Clear the linked list
-            Node *tmp; //Create a temporary node
-            while(head != NULL){ //While head exists
-                tmp = head; //Make the temp as head
-                head = head->next; //Head is the next of itself
-                free(tmp); //Free the temp
+            Node *tmp;
+            while(head != NULL){
+                tmp = head;
+                head = head->next;
+                free(tmp);
             }
             //Create the snake
             for(i = 0; i < 8; i++){
                 addNode((WIDTH_SNAKE / 2) - i, HEIGHT_SNAKE / 2);
             }
-            direction = KEY_RIGHT; //Set default direction to be RIGHT
-            genFood(); //Generate food
-            reset = 0; //Clear the reset flag
+            //Set default direction to be RIGHT
+            direction = KEY_RIGHT;
+            //Generate food
+            genFood();
+            //Clear the reset flag
+            reset = 0;
         }
-        while(alive){ //While the snake is alive
-            //unsigned long begin_time = (unsigned long)(get_absolute_time() / 1000); //Save the start time of the loop
+        while(alive){
             absolute_time_t current_time = get_absolute_time();
             uint64_t current_time_ms = to_us_since_boot(current_time) / 1000;
             unsigned long begin_time = (unsigned long)current_time_ms;
@@ -291,20 +305,20 @@ int main()
 						if (ch == KEY_Y) ResetToBootLoader();
 						changeDir(ch);
 
-            switch(direction){ //Switch based on the direction the snake is moving in
-                case KEY_UP: moveUp(); //If the direction is UP, move UP
+            switch(direction){
+                case KEY_UP: moveUp();
                             break;
-                case KEY_DOWN: moveDown(); //If the direction is DOWN, move DOWN
+                case KEY_DOWN: moveDown();
                             break;
-                case KEY_LEFT: moveLeft(); //If the direction is LEFT, move LEFT
+                case KEY_LEFT: moveLeft();
                             break;
-                case KEY_RIGHT: moveRight(); //If the direction is RIGHT, move RIGHT
+                case KEY_RIGHT: moveRight();
                             break;
                 default: break;
             }
 
 					DispUpdate();
-					sleep_ms(33 - ((unsigned long)current_time_ms - begin_time));
+					sleep_ms(55 - ((unsigned long)current_time_ms - begin_time));
         }
 			DispUpdate();
 		}
