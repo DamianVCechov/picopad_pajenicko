@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 set(PICO_TOOLCHAIN_PATH C:/Development/arm-none-eabi/bin)
 set(PICO_SDK_PATH C:/Development/sdk/pico/pico-sdk)
-set(PICOPAD_BASE_PATH C:\Development\sdk\netczech\picopad-playground\picopad-sdk\picopad-base\)
+set(PICOPAD_BASE_PATH C:/Development/sdk/netczech/picopad-playground/picopad-sdk/picopad-base)
 
 set(CMAKE_SIZE ${PICO_TOOLCHAIN_PATH}/arm-none-eabi-size)
 
