@@ -1,4 +1,4 @@
-Fork from the Picopad GAMES: https://github.com/Pajenicko/Picopad/tree/main/sdk/GAME
+Fork from the Picopad GAMES: [https://github.com/Pajenicko/Picopad/tree/main/sdk/GAME](https://github.com/tvecera/picopad-playground/tree/main/picopad-sdk/games)
 
 ---
 
