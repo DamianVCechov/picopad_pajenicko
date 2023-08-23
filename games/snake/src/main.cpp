@@ -78,7 +78,7 @@ genAgain:
         current = current->next;
     }
     //Draw a yellow rectangle for food
-    drawRect(food[0] << 2, food[1] << 2, SNAKE_SIZE, SNAKE_SIZE, COL_YELLOW);
+    drawRect(food[0] << 2, food[1] << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
 }
 
 //Function to add a new node for the snake
@@ -88,7 +88,7 @@ void addNode(short x, short y){
         head->x = x;
         head->y = y;
         head->next = NULL;
-        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
+        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
     }
     else{
         Node *current = head;
@@ -100,17 +100,17 @@ void addNode(short x, short y){
         current->next->y = y;
         current->next->next = NULL;
         //Draw a green rectangle for the list
-        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
+        drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BODY);
     }
 }
 
 //Function to move the snake such that the new coordinates of the head are x, y
 void move(short x, short y){
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
     Node *current = head;
     while(current != NULL){
         //Draw the new snake body
-        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
+        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BODY);
         //Swap the coordinates and the current node coordinates
         swap(&(current->x), &x);
         swap(&(current->y), &y);
@@ -119,16 +119,13 @@ void move(short x, short y){
             if(current->x == head->x && current->y == head->y){
                 alive = 0;
                 //Draw the head one last time
-                drawRect(head->x << 2, head->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
-                pDrawFont = FontBoldB8x14;
-                DrawFontHeight = 10;
-                DrawText2("Had je mrtev", 100, 200, COL_WHITE);
+                drawRect(head->x << 2, head->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
                 break;
             }
         }
     }
     //Clear the oldest element
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BACKGROUND);
 }
 
 //Function to eat the food and still move by increasing the length of the snake
@@ -137,11 +134,11 @@ void eatAndMove(short x, short y){
     PLAYSOUND(EatSnd);
     VolumeSound(3);
     //Draw the new head
-    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_RED);
+    drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
     Node *current = head;
     while(current->next != NULL){
         //Draw the new snake body
-        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
+        drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BODY);
         //Swap the coordinates and the current node coordinates
         swap(&(current->x), &x);
         swap(&(current->y), &y);
@@ -150,7 +147,7 @@ void eatAndMove(short x, short y){
      //Allocate new memory for the next node
     current->next = (Node *)malloc(sizeof(Node));
     //Draw the new snake body
-    drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_GREEN);
+    drawRect(current->x << 2, current->y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BODY);
     //Swap the coordinates and the current node coordinates
     swap(&(current->x), &x);
     swap(&(current->y), &y);
@@ -164,20 +161,20 @@ void eatAndMove(short x, short y){
 void moveUp(){
     if(head->x == food[0] && head->y == food[1]){
         if(head->y == 0){
-            eatAndMove(head->x, HEIGHT_SNAKE - 1);
+            //The snake hit the edge
+            alive = 0;
+            return;
         }
-        else{
-            eatAndMove(head->x, head->y - 1);
-        }
+        eatAndMove(head->x, head->y - 1);
         genFood();
     }
     else{
         if(head->y == 0){
-            move(head->x, HEIGHT_SNAKE - 1);
+            //The snake hit the edge
+            alive = 0;
+            return;
         }
-        else{
-            move(head->x, head->y - 1);
-        }
+        move(head->x, head->y - 1);
     }
 }
 
@@ -185,20 +182,20 @@ void moveUp(){
 void moveDown(){
     if(head->x == food[0] && head->y == food[1]){
         if(head->y == HEIGHT_SNAKE - 1){
-            eatAndMove(head->x, 0);
+            //The snake hit the edge
+            alive = 0;
+            return;
         }
-        else{
-            eatAndMove(head->x, head->y + 1);
-        }
+        eatAndMove(head->x, head->y + 1);
         genFood();
     }
     else{
         if(head->y == HEIGHT_SNAKE - 1){
-            move(head->x, 0);
+            //The snake hit the edge            
+            alive = 0;
+            return;
         }
-        else{
-            move(head->x, head->y + 1);
-        }
+        move(head->x, head->y + 1);
     }
 }
 
@@ -206,20 +203,20 @@ void moveDown(){
 void moveLeft(){
     if(head->x == food[0] && head->y == food[1]){
         if(head->x == 0){
-            eatAndMove(WIDTH_SNAKE - 1, head->y);
+            //The snake hit the edge            
+            alive = 0;
+            return;
         }
-        else{
-            eatAndMove(head->x - 1, head->y);
-        }
+        eatAndMove(head->x - 1, head->y);
         genFood();
     }
     else{
         if(head->x == 0){
-            move(WIDTH_SNAKE - 1, head->y);
+            //The snake hit the edge            
+            alive = 0;
+            return;
         }
-        else{
-            move(head->x - 1, head->y);
-        }
+        move(head->x - 1, head->y);
     }
 }
 
@@ -227,20 +224,20 @@ void moveLeft(){
 void moveRight(){ 
     if(head->x == food[0] && head->y == food[1]){
         if(head->x == WIDTH_SNAKE - 1){
-            eatAndMove(0, head->y);
+            //The snake hit the edge            
+            alive = 0;
+            return;
         }
-        else{
-            eatAndMove(head->x + 1, head->y);
-        }
+        eatAndMove(head->x + 1, head->y);
         genFood();
     }
     else{
         if(head->x == WIDTH_SNAKE - 1){
-            move(0, head->y);
+            //The snake hit the edge            
+            alive = 0;
+            return;
         }
-        else{
-            move(head->x + 1, head->y);
-        }
+        move(head->x + 1, head->y);
     }
 }
 
@@ -267,17 +264,20 @@ void changeDir(char key) {
 int main()
 {
     DeviceInit();
-		char ch = KEY_RIGHT;
-
+    char ch = KEY_RIGHT;
+    
     //An interator
     short i;
+    
     //Random seed
     srand(1);
-	SelFont8x8();
+	
+    SelFont8x8();
+    
     while(True){
         if(reset){
             //Clear the display
-			DrawClear(COL_BLACK);
+			DrawClear(COL_BACKGROUND);
             //Resurrect the snake
             alive = 1;
 
@@ -304,7 +304,9 @@ int main()
             uint64_t current_time_ms = to_us_since_boot(current_time) / 1000;
             unsigned long begin_time = (unsigned long)current_time_ms;
 						ch = KeyGet();
-						if (ch == KEY_Y) ResetToBootLoader();
+						if (ch == KEY_Y) {
+							ResetToBootLoader();
+						}
 						changeDir(ch);
 
             switch(direction){
@@ -319,10 +321,37 @@ int main()
                 default: break;
             }
 
-					DispUpdate();
-					sleep_ms(55 - ((unsigned long)current_time_ms - begin_time));
-        }
 			DispUpdate();
-		}
+			sleep_ms(55 - ((unsigned long)current_time_ms - begin_time));
 
+            // Check if the head of the snake hits the screen edge
+            if (head->x < 0 || head->x >= WIDTH_SNAKE || head->y < 0 || head->y >= HEIGHT_SNAKE) {
+                //Game over
+                alive = 0;
+            }
+        }
+			
+        // Clear the display
+        DrawClear(COL_BACKGROUND);
+        
+        // Draw the message to restart or quit
+        DrawImgRle(SnakeImg_RLE, SnakeImg_Pal, 0, 0, 320, 240);
+        DispUpdate();
+
+        // Wait for user input to restart or quit
+        while (1) {
+            ch = KeyGet();
+            if (ch == KEY_X) {
+                // Game reset
+                reset = 1;
+                break;
+            } else if (ch == KEY_Y) {
+                ResetToBootLoader();
+                // Exit game
+                alive = 0;
+                break;
+            }
+        }
+        DispUpdate();
+    }
 }
