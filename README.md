@@ -14,6 +14,16 @@ The game is still in development.
 
 ---
 
+TO-DO LIST:
+- sound for ~~eating food~~ and game over
+- ~~options to restart and end the game~~
+- ~~color in "snake style"~~
+- larger snake body
+- pause the game
+- score
+
+---
+
 **⚠️ WARNING ⚠️**
 
 Please DO NOT directly upload the build to Pico / Picopad. The build is specifically designed for the custom
