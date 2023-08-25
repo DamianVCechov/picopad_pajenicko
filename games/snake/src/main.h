@@ -11,18 +11,20 @@
 #include "picopad.h"
 
 // Sound files
-#include "../snd/eat.h"
+#include "../snd/eatSnd.h"
+#include "../snd/deadSnd.h"
 
 // Image files
-#include "../img/snake.h"
+#include "../img/deadPict.h"
 
 // Definition of snake
 #define WIDTH_SNAKE 80
 #define HEIGHT_SNAKE 60
-#define SNAKE_SIZE 4
+#define SNAKE_SIZE 6
 
 // Sound definition
-extern const u8 EatSnd[15781];
+extern const u8 EatSnd[13848];
+extern const u8 deadSnd[85328];
 
 // Graphic definition
 #define COL_BACKGROUND	RGBTO16(135, 165, 5)

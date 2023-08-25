@@ -55,6 +55,7 @@ void drawRect(short x, short y, short width, short height, uint16_t color) {
     }
 }
 
+
 //Function to swap two shorts
 void swap(short *x, short *y){
     if(*x != *y){
@@ -131,7 +132,7 @@ void move(short x, short y){
 //Function to eat the food and still move by increasing the length of the snake
 void eatAndMove(short x, short y){
     //Play sound
-    PLAYSOUND(EatSnd);
+    PLAYSOUND(eatSnd);
     VolumeSound(3);
     //Draw the new head
     drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
@@ -151,7 +152,7 @@ void eatAndMove(short x, short y){
     //Swap the coordinates and the current node coordinates
     swap(&(current->x), &x);
     swap(&(current->y), &y);
-        current = current->next;
+    current = current->next;
     current->x = x;
     current->y = y;
     current->next = NULL;
@@ -334,14 +335,18 @@ int main()
         // Clear the display
         DrawClear(COL_BACKGROUND);
         
+        //Play dead sound
+        PLAYSOUND(deadSnd);
+        VolumeSound(3);
         // Draw the message to restart or quit
-        DrawImgRle(SnakeImg_RLE, SnakeImg_Pal, 0, 0, 320, 240);
+        DrawImgRle(DeadpictImg_RLE, DeadpictImg_Pal, 0, 0, 320, 240);
         DispUpdate();
-
+        
         // Wait for user input to restart or quit
         while (1) {
             ch = KeyGet();
             if (ch == KEY_X) {
+                StopSound();
                 // Game reset
                 reset = 1;
                 break;
