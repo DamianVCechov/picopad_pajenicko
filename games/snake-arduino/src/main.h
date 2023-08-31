@@ -7,15 +7,12 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-//Picopad specific libraries
-#include "picopad.h"
-
 // Sound files
-#include "../snd/eatSnd.h"
-#include "../snd/deadSnd.h"
+#include "snd/eatSnd.h"
+#include "snd/deadSnd.h"
 
 // Image files
-#include "../img/deadPict.h"
+#include "img/deadPict.h"
 
 // Definition of snake
 #define WIDTH_SNAKE 80
@@ -29,8 +26,5 @@ extern const u8 deadSnd[85328];
 // Graphic definition
 #define COL_BACKGROUND	RGBTO16(135, 165, 5)
 #define COL_BODY        RGBTO16(33, 45, 22)
-
-//Variables for pause functions
-bool isPaused = false;
 
 #endif // _MAIN_H

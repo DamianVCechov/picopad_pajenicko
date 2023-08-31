@@ -304,27 +304,29 @@ int main()
             absolute_time_t current_time = get_absolute_time();
             uint64_t current_time_ms = to_us_since_boot(current_time) / 1000;
             unsigned long begin_time = (unsigned long)current_time_ms;
-						ch = KeyGet();
-						if (ch == KEY_Y) {
-							ResetToBootLoader();
-						}
-						changeDir(ch);
-
-            switch(direction){
-                case KEY_UP: moveUp();
-                            break;
-                case KEY_DOWN: moveDown();
-                            break;
-                case KEY_LEFT: moveLeft();
-                            break;
-                case KEY_RIGHT: moveRight();
-                            break;
-                default: break;
+			ch = KeyGet();
+			if (ch == KEY_Y) {
+				ResetToBootLoader();
+			}
+			changeDir(ch);
+            if (!isPaused) {
+                 switch(direction){
+                    case KEY_UP: moveUp();
+                                break;
+                    case KEY_DOWN: moveDown();
+                                break;
+                    case KEY_LEFT: moveLeft();
+                                break;
+                    case KEY_RIGHT: moveRight();
+                                break;
+                    default: break;
+                }
             }
-
+            if (ch == KEY_A) {
+                isPaused = !isPaused;
+            }
 			DispUpdate();
 			sleep_ms(55 - ((unsigned long)current_time_ms - begin_time));
-
             // Check if the head of the snake hits the screen edge
             if (head->x < 0 || head->x >= WIDTH_SNAKE || head->y < 0 || head->y >= HEIGHT_SNAKE) {
                 //Game over
