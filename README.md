@@ -19,7 +19,7 @@ TO-DO LIST:
 - ~~options to restart and end the game~~
 - ~~color in "snake style"~~
 - ~~larger snake body~~ the snake's body is now bigger, it is necessary to fix the bug with the inaccuracy of eating food
-- pause the game
+- ~~pause the game~~
 - score
 
 ---
