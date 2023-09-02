@@ -68,7 +68,7 @@ void swap(short *x, short *y){
 void genFood(){
 genAgain:
     food[0] = randomRange(0, WIDTH_SNAKE);
-    food[1] = randomRange(scoreY + 1, HEIGHT_SNAKE);
+    food[1] = randomRange(scoreY + 2, HEIGHT_SNAKE);
     Node *current = head;
     current = current->next;
     while(current != NULL){ 
@@ -77,7 +77,7 @@ genAgain:
         }
         current = current->next;
     }
-    //Draw a yellow rectangle for food
+    //Draw rectangle for food
     drawRect(food[0] << 2, food[1] << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BLACK);
 }
 
@@ -104,9 +104,19 @@ void addNode(short x, short y){
     }
 }
 
+//Draw rectangle for custom score background
+void DrawFillRect(short x, short y, short width, short height, uint16_t color) {
+    for (short i = y; i < y + height; i++) {
+        for (short j = x; j < x + width; j++) {
+            DrawPoint(j, i, color);
+        }
+    }
+}
+
 //Function for score display
 void drawScore(int score) {
-    SelFont8x8;
+    DrawFillRect(0, 0, 320, 22, COL_SCORE);
+    SelFont6x8();
     snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
     DrawText2(scoreText, scoreX, scoreY, COL_BLACK);
 }
@@ -171,7 +181,7 @@ void moveUp(){
         score++;
         DrawClear(COL_BACKGROUND);
         drawScore(score);
-        if(head->y == 0){
+        if(head->y == SCORE_AREA){
             //The snake hit the edge
             alive = 0;
             return;
@@ -180,7 +190,7 @@ void moveUp(){
         genFood();
     }
     else{
-        if(head->y == 0){
+        if(head->y == SCORE_AREA){
             //The snake hit the edge
             alive = 0;
             return;
@@ -294,12 +304,11 @@ int main() {
     //Random seed
     srand(1);
 	
-    SelFont8x8();
-    
     while(True){
         if(reset){
             //Clear the display
-			DrawClear(COL_BACKGROUND);
+    		DrawClear(COL_BACKGROUND);
+
             //Resurrect the snake
             alive = 1;
 
@@ -351,7 +360,7 @@ int main() {
 			DispUpdate();
 			sleep_ms(55 - ((unsigned long)current_time_ms - begin_time));
             // Check if the head of the snake hits the screen edge
-            if (head->x < 0 || head->x >= WIDTH_SNAKE || head->y < 0 || head->y >= HEIGHT_SNAKE) {
+            if (head->x < 0 || head->x >= WIDTH_SNAKE || head->y < SCORE_AREA) {
                 //Game over
                 alive = 0;
             }

@@ -29,14 +29,18 @@ extern const u8 deadSnd[85328];
 // Graphic definition
 #define COL_BACKGROUND	RGBTO16(135, 165, 5)
 #define COL_BODY        RGBTO16(33, 45, 22)
+#define COL_SCORE       RGBTO16(33, 45, 22)
 
 //Variables for pause function
 bool isPaused = false;
+
+//Score area definition
+#define SCORE_AREA 6
 
 //Variables for score
 int score = 0;
 char scoreText[20];
 short scoreX = 5;
-short scoreY = 10;
+short scoreY = 3;
 
 #endif // _MAIN_H
