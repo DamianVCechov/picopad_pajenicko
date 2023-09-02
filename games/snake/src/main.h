@@ -30,7 +30,13 @@ extern const u8 deadSnd[85328];
 #define COL_BACKGROUND	RGBTO16(135, 165, 5)
 #define COL_BODY        RGBTO16(33, 45, 22)
 
-//Variables for pause functions
+//Variables for pause function
 bool isPaused = false;
+
+//Variables for score
+int score = 0;
+char scoreText[20];
+short scoreX = 5;
+short scoreY = 10;
 
 #endif // _MAIN_H

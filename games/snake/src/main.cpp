@@ -55,7 +55,6 @@ void drawRect(short x, short y, short width, short height, uint16_t color) {
     }
 }
 
-
 //Function to swap two shorts
 void swap(short *x, short *y){
     if(*x != *y){
@@ -68,8 +67,8 @@ void swap(short *x, short *y){
  //The function to generate the food
 void genFood(){
 genAgain:
-    food[0] = randomRange(0, HEIGHT_SNAKE);
-    food[1] = randomRange(0, HEIGHT_SNAKE);
+    food[0] = randomRange(0, WIDTH_SNAKE);
+    food[1] = randomRange(scoreY + 1, HEIGHT_SNAKE);
     Node *current = head;
     current = current->next;
     while(current != NULL){ 
@@ -103,6 +102,13 @@ void addNode(short x, short y){
         //Draw a green rectangle for the list
         drawRect(x << 2, y << 2, SNAKE_SIZE, SNAKE_SIZE, COL_BODY);
     }
+}
+
+//Function for score display
+void drawScore(int score) {
+    SelFont8x8;
+    snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
+    DrawText2(scoreText, scoreX, scoreY, COL_BLACK);
 }
 
 //Function to move the snake such that the new coordinates of the head are x, y
@@ -161,6 +167,10 @@ void eatAndMove(short x, short y){
 //The function to move UP
 void moveUp(){
     if(head->x == food[0] && head->y == food[1]){
+        //Increases the score by one point and updates it
+        score++;
+        DrawClear(COL_BACKGROUND);
+        drawScore(score);
         if(head->y == 0){
             //The snake hit the edge
             alive = 0;
@@ -182,6 +192,10 @@ void moveUp(){
 //The function to move DOWN
 void moveDown(){
     if(head->x == food[0] && head->y == food[1]){
+        //Increases the score by one point and updates it
+        score++;
+        DrawClear(COL_BACKGROUND);
+        drawScore(score);
         if(head->y == HEIGHT_SNAKE - 1){
             //The snake hit the edge
             alive = 0;
@@ -203,6 +217,10 @@ void moveDown(){
 //The function to move LEFT
 void moveLeft(){
     if(head->x == food[0] && head->y == food[1]){
+        //Increases the score by one point and updates it
+        score++;
+        DrawClear(COL_BACKGROUND);
+        drawScore(score);
         if(head->x == 0){
             //The snake hit the edge            
             alive = 0;
@@ -224,6 +242,10 @@ void moveLeft(){
 //The function to move RIGHT
 void moveRight(){ 
     if(head->x == food[0] && head->y == food[1]){
+        //Increases the score by one point and updates it
+        score++;
+        DrawClear(COL_BACKGROUND);
+        drawScore(score);
         if(head->x == WIDTH_SNAKE - 1){
             //The snake hit the edge            
             alive = 0;
@@ -262,8 +284,7 @@ void changeDir(char key) {
     }
 }
 
-int main()
-{
+int main() {
     DeviceInit();
     char ch = KEY_RIGHT;
     
@@ -304,7 +325,9 @@ int main()
             absolute_time_t current_time = get_absolute_time();
             uint64_t current_time_ms = to_us_since_boot(current_time) / 1000;
             unsigned long begin_time = (unsigned long)current_time_ms;
-			ch = KeyGet();
+			//Prints the score
+            drawScore(score);
+            ch = KeyGet();
 			if (ch == KEY_Y) {
 				ResetToBootLoader();
 			}
