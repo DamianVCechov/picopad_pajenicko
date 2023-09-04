@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd..
+cd ..
 ./e.sh
 cd src
