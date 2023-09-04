@@ -8,9 +8,9 @@
 // https://github.com/Panda381/PicoLibSDK
 // Designed to be compiled into UF2 with its own bootloader that allows booting from SD card.
 
-
 //Include necessary libraries
 #include "../include.h"
+
 //Picopad specific libraries
 #include "main.h"
 
@@ -57,8 +57,10 @@ void swap(short *x, short *y){
  //The function to generate the food
 void genFood(){
 genAgain:
+    //Generate food for the x-axis
     food[0] = randomRange(0, WIDTH_SNAKE);
-    food[1] = randomRange(scoreY + 2, HEIGHT_SNAKE);
+    //Generate food for the y-axis
+    food[1] = randomRange(5, HEIGHT_SNAKE);
     Node *current = head;
     current = current->next;
     while(current != NULL){ 
@@ -94,21 +96,21 @@ void addNode(short x, short y){
     }
 }
 
-//Draw rectangle for custom score background
-void DrawFillRect(short x, short y, short width, short height, uint16_t color) {
-    for (short i = y; i < y + height; i++) {
-        for (short j = x; j < x + width; j++) {
-            DrawPoint(j, i, color);
-        }
+//Function for Pause display
+void drawPause(int pause) {
+    if (pause) {
+        SelFont6x8();
+        DrawText2("Pause", 235, 3, COL_BLACK);
+    } else {
+        DrawText2("Pause", 235, 3, COL_BACKGROUND);
     }
 }
 
 //Function for score display
 void drawScore(int score) {
-    DrawFillRect(0, 0, 320, 22, COL_SCORE);
     SelFont6x8();
     snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
-    DrawText2(scoreText, scoreX, scoreY, COL_BLACK);
+    DrawText2(scoreText, 30, 3, COL_BLACK);
 }
 
 //Function to move the snake such that the new coordinates of the head are x, y
@@ -170,6 +172,8 @@ void moveUp(){
         //Increases the score by one point and updates it
         score++;
         DrawClearCol(COL_BACKGROUND);
+        DrawLine (20, 22, 305, 22, COL_BLACK);
+        DrawLine (20, 23, 305, 23, COL_BLACK); 
         drawScore(score);
         if(head->y == SCORE_AREA){
             //The snake hit the edge
@@ -195,6 +199,8 @@ void moveDown(){
         //Increases the score by one point and updates it
         score++;
         DrawClearCol(COL_BACKGROUND);
+        DrawLine (20, 22, 305, 22, COL_BLACK);
+        DrawLine (20, 23, 305, 23, COL_BLACK); 
         drawScore(score);
         if(head->y == HEIGHT_SNAKE - 1){
             //The snake hit the edge
@@ -220,6 +226,8 @@ void moveLeft(){
         //Increases the score by one point and updates it
         score++;
         DrawClearCol(COL_BACKGROUND);
+        DrawLine (20, 22, 305, 22, COL_BLACK);
+        DrawLine (20, 23, 305, 23, COL_BLACK); 
         drawScore(score);
         if(head->x == 0){
             //The snake hit the edge            
@@ -245,6 +253,8 @@ void moveRight(){
         //Increases the score by one point and updates it
         score++;
         DrawClearCol(COL_BACKGROUND);
+        DrawLine (20, 22, 305, 22, COL_BLACK);
+        DrawLine (20, 23, 305, 23, COL_BLACK); 
         drawScore(score);
         if(head->x == WIDTH_SNAKE - 1){
             //The snake hit the edge            
@@ -296,9 +306,14 @@ int main() {
 	
     while(True){
         if(reset){
-            //Clear the display
+            //Clear the display and draw score line (the upper limit of the snake's movement)
     		DrawClearCol(COL_BACKGROUND);
-
+            DrawLine (20, 22, 305, 22, COL_BLACK);
+            DrawLine (20, 23, 305, 23, COL_BLACK); 
+            
+            //Set the score to 0 when the game start
+            score = 0;
+            
             //Resurrect the snake
             alive = 1;
 
@@ -313,26 +328,31 @@ int main() {
             for(i = 0; i < 8; i++){
                 addNode((WIDTH_SNAKE / 2) - i, HEIGHT_SNAKE / 2);
             }
+            
             //Set default direction to be RIGHT
             direction = KEY_RIGHT;
+            
             //Generate food
             genFood();
+            
             //Clear the reset flag
             reset = 0;
         }
         while(alive){
-	    // Counting the time from the beginning of the game loop.
+	    //Function that counts the time in ms from the start of the game loop to ensure the same game speed.
 	    uint16_t current_time_ms = Time64() / 1000;
-	    unsigned long begin_time = (unsigned long)current_time_ms;
-
-			//Prints the score
+            unsigned long begin_time = (unsigned long)current_time_ms;
+			
+            //Prints the score
             drawScore(score);
+            
             ch = KeyGet();
 			if (ch == KEY_Y) {
 				ResetToBootLoader();
 			}
 			changeDir(ch);
-            if (!isPaused) {
+            
+            if (!pause) {
                  switch(direction){
                     case KEY_UP: moveUp();
                                 break;
@@ -346,10 +366,13 @@ int main() {
                 }
             }
             if (ch == KEY_A) {
-                isPaused = !isPaused;
+                pause = !pause;
+                drawPause(pause);
             }
+
 			DispUpdate();
 			WaitMs(55 - ((unsigned long)current_time_ms - begin_time));
+            
             // Check if the head of the snake hits the screen edge
             if (head->x < 0 || head->x >= WIDTH_SNAKE || head->y < SCORE_AREA) {
                 //Game over
@@ -363,6 +386,7 @@ int main() {
         //Play dead sound
         PLAYSOUND(deadSnd);
         VolumeSound(3);
+        
         // Draw the message to restart or quit
         DrawImgRle(DeadpictImg_RLE, DeadpictImg_Pal, 0, 0, 320, 240);
         DispUpdate();
