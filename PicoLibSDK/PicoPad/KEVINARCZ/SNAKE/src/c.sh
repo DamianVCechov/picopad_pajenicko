@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd..
+cd ..
 ./c.sh
 cd src
